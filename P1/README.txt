@@ -3,17 +3,17 @@ P1
 
 IMAGENS:
 - Ficheiro: img1.ppm
-- Resolução: 312x312
+- Resoluï¿½ï¿½o: 312x312
 - Depth: 8bpp
-- Espaço de Cor: Tons de cinzento
+- Espaï¿½o de Cor: Tons de cinzento
 - Fonte: TAC
 
-DESCRIÇÃO:
-A imagem (img1.ppm) apresenta uma imagem de uma ressonância magnética realizada à cabeça de um paciente.
+DESCRIï¿½ï¿½O:
+A imagem (img1.ppm) apresenta uma imagem de uma ressonï¿½ncia magnï¿½tica realizada ï¿½ cabeï¿½a de um paciente.
 
 
 OBJECTIVOS:
 Este trabalho tem como objectivo desenvolver um programa em linguagem C, que processe  a imagem fornecida, 
-de modo a calcular a área do cérebro (a aplicação deverá excluir os píxeis do crânio), perímetro e respetivo 
-centro de massa. A aplicação deverá, ainda, produzir uma imagem semelhante à de entrada, mas que apresente apenas o 
-cérebro, isto é, removendo a estrutura do crânio.
+de modo a calcular a ï¿½rea do cï¿½rebro (a aplicaï¿½ï¿½o deverï¿½ excluir os pï¿½xeis do crï¿½nio), perï¿½metro e respetivo 
+centro de massa. A aplicaï¿½ï¿½o deverï¿½, ainda, produzir uma imagem semelhante ï¿½ de entrada, mas que apresente apenas o 
+cï¿½rebro, isto ï¿½, removendo a estrutura do crï¿½nio.
