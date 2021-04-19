@@ -62,3 +62,68 @@
     system("cmd /c start FilterGear result4.pgm");
     system("cmd /c start FilterGear result5.pgm");
 }*/
+
+#include <stdio.h>
+#include "vc.h"
+
+
+int main(){
+    
+	IVC* image[4];
+	int label;
+
+	// Leitura da Imagem 
+	image[0] = vc_read_image("");
+	image[3] = vc_read_image("");
+	if (image[0] == NULL)
+	{
+		printf("ERROR -> vc_readimage() \n File not found!\n");
+		getchar();
+		return 0;
+	}
+	
+	// Criação de uma imagem copia da original
+	image[1] = vc_image_new(image[0]->width, image[0]->height, image[0]->channels, image[0]->levels);
+	image[2] = vc_image_new(image[0]->width, image[0]->height, image[0]->channels, image[0]->levels);
+
+	if (image[1] == NULL || image[2] == NULL)
+	{
+		printf("ERROR -> vc_readimage() \n File not found!\n");
+		getchar();
+		return 0;
+	}
+
+	// Binarizacao por thresholding
+	vc_gray_to_binary(image[0],image[1],70);
+
+	// Dilatacao
+	vc_gray_to_binary_dilate(image[1], image[2], 3);
+	vc_gray_to_binary_dilate(image[2], image[1], 3);
+	vc_gray_to_binary_dilate(image[1], image[2], 3);
+	vc_gray_to_binary_dilate(image[2], image[1], 3);
+	vc_gray_to_binary_dilate(image[1], image[2], 3);
+
+
+	// Erosao
+	vc_gray_to_binary_erode(image[2], image[1], 11);
+	vc_gray_to_binary_erode(image[1], image[2], 5);
+	
+	//vc_gray_binary_close(image[1], image[2], 7);
+
+	// Meter Imagem original
+	vc_original(image[3], image[2]);
+	
+	vc_write_image("", image[2]);
+	vc_image_free(image[0]);
+	vc_image_free(image[1]);
+	vc_image_free(image[2]);
+	vc_image_free(image[3]);
+
+	
+	//system("cmd /c start FilterGear TP1/img1.pgm");
+	//system("FilterGear TP1teste.pgm");
+	
+	return 1;
+    system("cmd /c start FilterGear P1/img1.pgm");
+	system("cmd /c start FilterGear P2/img2.ppm");
+}
