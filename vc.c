@@ -853,7 +853,7 @@ int vc_gray_to_binary_midpoint(IVC* src, IVC* dst, int kernel)
 	return 1;
 }
 
-//Dilata��o de imagem bin�ria
+//Dilatacao de imagem binaria
 int vc_binary_dilate(IVC* src, IVC* dst, int kernel)
 {
 	unsigned char* datasrc = (unsigned char*)src->data;
@@ -868,7 +868,7 @@ int vc_binary_dilate(IVC* src, IVC* dst, int kernel)
 	int x, y, x2, y2, level;
 
 
-	// Verifica��o de erros
+	// Verificacao de erros
 	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
 	if (width != dst->width || height != dst->height) return 0;
 	if (channels_src != 1 || channels_dst != 1) return 0;
@@ -905,7 +905,7 @@ int vc_binary_dilate(IVC* src, IVC* dst, int kernel)
 	return 1;
 }
 
-//Eros�o de imagem bin�ria
+//Erosao de imagem binaria
 int vc_binary_erode(IVC* src, IVC* dst, int kernel)
 {
 	unsigned char* datasrc = (unsigned char*)src->data;
@@ -1283,10 +1283,10 @@ int vc_binary_blob_info(IVC* src, OVC* blobs, int nblobs)
 		blobs[i].height = (ymax - ymin) + 1;
 
 		// Centro de Gravidade
-		//blobs[i].xc = (xmax - xmin) / 2;
-		//blobs[i].yc = (ymax - ymin) / 2;
-		/*blobs[i].xc = sumx / MAX(blobs[i].area, 1);
-		blobs[i].yc = sumy / MAX(blobs[i].area, 1);*/
+		/*blobs[i].xc = (xmax - xmin) / 2;
+		blobs[i].yc = (ymax - ymin) / 2;*/
+		blobs[i].xc = sumx / MAX(blobs[i].area, 1);
+		blobs[i].yc = sumy / MAX(blobs[i].area, 1);
 	}
 
 	return 1;
@@ -1360,5 +1360,44 @@ int vc_binary_to_original(IVC* src, IVC* dst)
 			if (data[pos]==0) datadst[pos]=0;
 		}
 	}
+	return 1;
+}
+
+int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels)
+{
+	unsigned char* data = (unsigned char*)src->data;
+	unsigned char* datadst = (unsigned char*)dst->data;
+	int width = src->width;
+	int height = src->height;
+	int bytesperline = src->width * src->channels;
+	int channels = src->channels;
+	int x, y, i;
+	long int pos;
+
+	//Verifica��o de erros
+	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
+	if (channels != 1) return 0;
+	//Inverter a imagem Gray
+	if (blobs != NULL)
+	{
+		for (i = 0; i < labels; i++)
+		{
+			for (y = 0; y < height; y++)
+			{
+				for (x = 0; x < width; x++)
+				{
+					pos = y * bytesperline + x * channels;
+					if (y >= blobs[i].y && y <= blobs[i].y+blobs[i].height && x >= blobs[i].x && x <= blobs[i].x+blobs[i].width)
+						if (x == blobs[i].x || x == blobs[i].x+blobs[i].width)
+							datadst[pos] = 255;
+						else if (y == blobs[i].y || y == blobs[i].y+blobs[i].height)
+							datadst[pos] = 255;
+						else datadst[pos] = data[pos];
+				}
+			}
+		}
+		free(blobs); //PARA Que?
+	}
+
 	return 1;
 }
