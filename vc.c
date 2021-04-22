@@ -1363,6 +1363,35 @@ int vc_binary_to_original(IVC* src, IVC* dst)
 	return 1;
 }
 
+int vc_rgb_to_original(IVC* src, IVC* dst)
+{
+	unsigned char* data = (unsigned char*)src->data;
+	unsigned char* datadst = (unsigned char*)dst->data;
+	int width = src->width;
+	int height = src->height;
+	int bytesperline = src->width * src->channels;
+	int channels = src->channels;
+	int x, y;
+	long int pos;
+
+	//Verifica��o de erros
+	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
+	if (channels != 3) return 0;
+
+	//Inverter a imagem Gray
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			pos = y * bytesperline + x * channels;
+			if (data[pos]==0) datadst[pos]=0;
+			if (data[pos+1]==0) datadst[pos+1]=0;
+			if (data[pos+2]==0) datadst[pos+2]=0;
+		}
+	}
+	return 1;
+}
+
 int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels)
 {
 	unsigned char* data = (unsigned char*)src->data;
@@ -1396,8 +1425,77 @@ int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels)
 				}
 			}
 		}
-		free(blobs); //PARA Que?
 	}
 
+	return 1;
+}
+
+int vc_draw_center_mass(IVC* src, IVC* dst, OVC* blobs, int labels)
+{
+	unsigned char* data = (unsigned char*)src->data;
+	unsigned char* datadst = (unsigned char*)dst->data;
+	int width = src->width;
+	int height = src->height;
+	int bytesperline = src->width * src->channels;
+	int channels = src->channels;
+	int x, y, i;
+	long int pos;
+
+	//Verifica��o de erros
+	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
+	if (channels != 1) return 0;
+	//Inverter a imagem Gray
+	if (blobs != NULL)
+	{
+		for (i = 0; i < labels; i++)
+		{
+			for (y = 0; y < height; y++)
+			{
+				for (x = 0; x < width; x++)
+				{
+					pos = y * bytesperline + x * channels;
+					if(x==blobs[i].xc && y==blobs[i].yc)
+						datadst[pos] = 80;
+				}
+			}
+		}
+	}
+
+	return 1;
+}
+
+//Converter cinzentos(1canal) para RGB(3canais) (temperatura)
+int vc_scale(IVC* src, IVC* dst)
+{
+	unsigned char* datasrc = (unsigned char*)src->data;
+	unsigned char* datadst = (unsigned char*)dst->data;
+	int bytesperline_src = src->width * src->channels;
+	int bytesperline_dst = dst->width * dst->channels;
+	int channels_src = src->channels;
+	int channels_dst = dst->channels;
+	int width = src->width;
+	int height = src->height;
+	int r, g, b;
+	long int pos_src, pos_dst;
+	int x, y;
+
+	// Verifica��o de erros
+	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
+	if (width != dst->width || height != dst->height) return 0;
+	if (channels_src != 1 || channels_dst != 3) return 0;
+
+	//Percorrer todos os pixeis da imagem fonte
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			pos_src = y * bytesperline_src + x * channels_src;
+			pos_dst = y * bytesperline_dst + x * channels_dst;
+
+			datadst[pos_dst] = datasrc[pos_src];
+			datadst[pos_dst + 1] = datasrc[pos_src];
+			datadst[pos_dst + 2] = datasrc[pos_src];
+		}
+	}
 	return 1;
 }
