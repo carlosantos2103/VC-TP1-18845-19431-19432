@@ -1405,7 +1405,7 @@ int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels)
 
 	//Verifica��o de erros
 	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
-	if (channels != 1) return 0;
+	if (channels != 3) return 0;
 	//Inverter a imagem Gray
 	if (blobs != NULL)
 	{
@@ -1417,11 +1417,16 @@ int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels)
 				{
 					pos = y * bytesperline + x * channels;
 					if (y >= blobs[i].y && y <= blobs[i].y+blobs[i].height && x >= blobs[i].x && x <= blobs[i].x+blobs[i].width)
-						if (x == blobs[i].x || x == blobs[i].x+blobs[i].width)
+						if (x == blobs[i].x || x == blobs[i].x+blobs[i].width){
 							datadst[pos] = 255;
-						else if (y == blobs[i].y || y == blobs[i].y+blobs[i].height)
+							datadst[pos+1] = 255;
+							datadst[pos+2] = 255;
+						}
+						else if (y == blobs[i].y || y == blobs[i].y+blobs[i].height){
 							datadst[pos] = 255;
-						else datadst[pos] = data[pos];
+							datadst[pos+1] = 255;
+							datadst[pos+2] = 255;
+						}
 				}
 			}
 		}

@@ -73,3 +73,7 @@ int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels);
 int vc_scale(IVC* src, IVC* dst);
 int vc_rgb_to_original(IVC* src, IVC* dst);
 int vc_draw_center_mass(IVC* src, IVC* dst, OVC* blobs, int labels);
+
+
+
+int vc_gray_to_original(IVC* src, IVC* dst);
