@@ -1400,12 +1400,13 @@ int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels)
 	int height = src->height;
 	int bytesperline = src->width * src->channels;
 	int channels = src->channels;
+	int channels_dst = dst->channels;
 	int x, y, i;
-	long int pos;
+	long int pos, pos_dst;
 
 	//Verifica��o de erros
 	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
-	if (channels != 3) return 0;
+	if (channels != 1 || channels_dst != 3) return 0;
 	//Inverter a imagem Gray
 	if (blobs != NULL)
 	{
@@ -1416,16 +1417,17 @@ int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels)
 				for (x = 0; x < width; x++)
 				{
 					pos = y * bytesperline + x * channels;
+					pos_dst = y * dst->bytesperline + x * dst->channels;
 					if (y >= blobs[i].y && y <= blobs[i].y+blobs[i].height && x >= blobs[i].x && x <= blobs[i].x+blobs[i].width)
 						if (x == blobs[i].x || x == blobs[i].x+blobs[i].width){
-							datadst[pos] = 255;
-							datadst[pos+1] = 255;
-							datadst[pos+2] = 255;
+							datadst[pos_dst] = 255;
+							datadst[pos_dst+1] = 255;
+							datadst[pos_dst+2] = 255;
 						}
 						else if (y == blobs[i].y || y == blobs[i].y+blobs[i].height){
-							datadst[pos] = 255;
-							datadst[pos+1] = 255;
-							datadst[pos+2] = 255;
+							datadst[pos_dst] = 255;
+							datadst[pos_dst+1] = 255;
+							datadst[pos_dst+2] = 255;
 						}
 				}
 			}
@@ -1443,12 +1445,13 @@ int vc_draw_center_mass(IVC* src, IVC* dst, OVC* blobs, int labels)
 	int height = src->height;
 	int bytesperline = src->width * src->channels;
 	int channels = src->channels;
-	int x, y, i;
-	long int pos;
+	int channels_dst = dst->channels;
+	int x, y, i, j;
+	long int pos, pos_dst;
 
 	//Verifica��o de erros
 	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
-	if (channels != 1) return 0;
+	if (channels != 1 || channels_dst != 3) return 0;
 	//Inverter a imagem Gray
 	if (blobs != NULL)
 	{
@@ -1459,8 +1462,12 @@ int vc_draw_center_mass(IVC* src, IVC* dst, OVC* blobs, int labels)
 				for (x = 0; x < width; x++)
 				{
 					pos = y * bytesperline + x * channels;
-					if(x==blobs[i].xc && y==blobs[i].yc)
-						datadst[pos] = 80;
+					pos_dst = y * dst->bytesperline + x * dst->channels;
+					if(x==blobs[i].xc && y==blobs[i].yc) {
+						datadst[pos_dst] = 255;
+						datadst[pos_dst+1] = 255;
+						datadst[pos_dst+2] = 255;
+					}
 				}
 			}
 		}

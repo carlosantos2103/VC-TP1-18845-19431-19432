@@ -81,39 +81,40 @@
 	return 1;
 }*/
 
+#define IMAGES 5   
+
 int main(){
-    
-	IVC* image[5];
+	IVC* image[IMAGES];
 
 	// Leitura da Imagem original
 	image[0] = vc_read_image("P2/img2.ppm");
 	image[4] = vc_read_image("P2/img2.ppm");
-	if (image[0] == NULL)
+
+	//Verificacao de erros
+	if (image[0] == NULL || image[4] == NULL)
 	{
 		printf("ERROR -> vc_readimage() \n File not found!\n");
 		getchar();
 		return 0;
 	}
-	
-	// Criação de uma imagem copia da original
+
+	// Criação de imagens auxilares com 1 ou 3 canais
 	image[1] = vc_image_new(image[0]->width, image[0]->height, 1, image[0]->levels);
 	image[2] = vc_image_new(image[0]->width, image[0]->height, 1, image[0]->levels);
 	image[3] = vc_image_new(image[0]->width, image[0]->height, image[0]->channels, image[0]->levels);
 
 	//Verificacao de erros
-	if (image[1] == NULL || image[2] == NULL)
+	if (image[1] == NULL || image[2] == NULL || image[3] == NULL)
 	{
 		printf("ERROR -> vc_readimage() \n File not found!\n");
 		getchar();
 		return 0;
 	}
 
-	
 
 	vc_rgb_get_blue_gray(image[0]);
 	vc_rgb_to_gray(image[0], image[1]);
-	vc_gray_to_binary(image[1],image[2], 50); //1
-	//vc_gray_to_binary_global_mean(image[1],image[2]);
+	vc_gray_to_binary(image[1],image[2], 50);
 	vc_binary_close(image[2],image[1], 3, 3);
 
 
@@ -130,25 +131,24 @@ int main(){
 			printf("-> Area Nucleo %d: %d\n", i+1, blobs[i].area);
 		}
 	}
-	vc_scale_gray_to_rgb(image[2], image[1]);
-	vc_write_image("result2.pgm", image[1]);
-	//vc_draw_center_mass(image[2], image[0], blobs, labels);
-	vc_draw_bouding_box(image[1], image[4], blobs, labels);
 
-	//vc_gray_to_original(src, dst)
+	//printf("%d", vc_scale_gray_to_rgb(image[2], image[1]));
+	printf("%d", vc_write_image("result2.pgm", image[1]));
+	printf("%d", vc_draw_bouding_box(image[2], image[4], blobs, labels));
+	printf("%d", vc_draw_center_mass(image[2], image[4], blobs, labels));
+	printf("okla");
 
-	vc_write_image("mostra.ppm", image[4]);
-	vc_write_image("result2.pgm", image[2]);
-	vc_write_image("result.ppm", image[0]);
 
-	vc_image_free(image[0]);
-	vc_image_free(image[1]);
-	vc_image_free(image[2]);
+	printf("%d", vc_write_image("mostra.ppm", image[4]));
 
-	//system("cmd /c start FilterGear P2/img2.ppm");
-	system("cmd /c start FilterGear result2.pgm");
-    system("cmd /c start FilterGear result.ppm"); //4
-	system("cmd /c start FilterGear mostra.ppm"); //4
+	printf("%d", vc_write_image("result.ppm", image[0]));
 
+	//for(i=0; i<IMAGES; i++)
+//		vc_image_free(image[i]);
+	
+	printf("okla");
+    system("cmd /c start FilterGear P2/img2.ppm");
+	system("cmd /c start FilterGear mostra.ppm");
+	printf("okla");
 	return 1;
 }
