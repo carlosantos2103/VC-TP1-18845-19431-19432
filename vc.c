@@ -1459,15 +1459,36 @@ int vc_draw_center_mass(IVC* src, IVC* dst, OVC* blobs, int labels)
 		{
 			for (y = 0; y < height; y++)
 			{
-				for (x = 0; x < width; x++)
-				{
-					pos = y * bytesperline + x * channels;
-					pos_dst = y * dst->bytesperline + x * dst->channels;
-					if(x==blobs[i].xc && y==blobs[i].yc) {
-						datadst[pos_dst] = 255;
-						datadst[pos_dst+1] = 255;
-						datadst[pos_dst+2] = 255;
+				if (y==blobs[i].yc){
+					for (x = 0; x < width; x++)
+					{
+						if(x==blobs[i].xc) {
+							pos_dst = y * dst->bytesperline + x * dst->channels;
+
+							datadst[pos_dst] = 255;
+							datadst[pos_dst+1] = 255;
+							datadst[pos_dst+2] = 255;
+
+							datadst[pos_dst+3] = 255;
+							datadst[pos_dst+4] = 255;
+							datadst[pos_dst+5] = 255;
+
+							datadst[pos_dst-1] = 255;
+							datadst[pos_dst-2] = 255;
+							datadst[pos_dst-3] = 255;
+							
+							datadst[pos_dst-width*3] = 255;
+							datadst[pos_dst-width*3+1] = 255;
+							datadst[pos_dst-width*3+2] = 255;
+
+							datadst[pos_dst+width*3] = 255;
+							datadst[pos_dst+width*3+1] = 255;
+							datadst[pos_dst+width*3+2] = 255;
+
+							break;
+						}
 					}
+					break;
 				}
 			}
 		}
