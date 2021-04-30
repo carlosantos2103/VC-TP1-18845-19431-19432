@@ -364,32 +364,6 @@ int vc_write_image(char* filename, IVC* image)
 	return 0;
 }
 
-//Gerar negativo de imagem cinzenta
-int vc_gray_negative(IVC* srcdst)
-{
-	unsigned char* data = (unsigned char*)srcdst->data;
-	int width = srcdst->width;
-	int height = srcdst->height;
-	int bytesperline = srcdst->width * srcdst->channels;
-	int channels = srcdst->channels;
-	int x, y;
-	long int pos;
-
-	//Verifica��o de erros
-	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
-	if (channels != 1) return 0;
-
-	//Inverter a imagem Gray
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			pos = y * bytesperline + x * channels;
-			data[pos] = (unsigned char)(255 - data[pos]);
-		}
-	}
-	return 1;
-}
 
 //Gerar negativo de imagem RGB
 int vc_rgb_negative(IVC* srcdst)
@@ -416,64 +390,6 @@ int vc_rgb_negative(IVC* srcdst)
 			data[pos] = (unsigned char)(255 - data[pos]);
 			data[pos + 1] = (unsigned char)(255 - data[pos + 1]);
 			data[pos + 2] = (unsigned char)(255 - data[pos + 2]);
-		}
-	}
-	return 1;
-}
-
-//Extra��o do componente Red da imagem RGB para Gray
-int vc_rgb_get_red_gray(IVC* srcdst)
-{
-	unsigned char* data = (unsigned char*)srcdst->data;
-	int width = srcdst->width;
-	int height = srcdst->height;
-	int bytesperline = srcdst->width * srcdst->channels;
-	int channels = srcdst->channels;
-	int x, y;
-	long int pos;
-
-	//Verifica��o de erros
-	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
-	if (channels != 3) return 0;
-
-	//Inverter a imagem RGB
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			pos = y * bytesperline + x * channels;
-
-			data[pos + 1] = (unsigned char)data[pos];
-			data[pos + 2] = (unsigned char)data[pos];
-		}
-	}
-	return 1;
-}
-
-//Extra��o do componente Green da imagem RGB para Gray
-int vc_rgb_get_green_gray(IVC* srcdst)
-{
-	unsigned char* data = (unsigned char*)srcdst->data;
-	int width = srcdst->width;
-	int height = srcdst->height;
-	int bytesperline = srcdst->width * srcdst->channels;
-	int channels = srcdst->channels;
-	int x, y;
-	long int pos;
-
-	//Verifica��o de erros
-	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
-	if (channels != 3) return 0;
-
-	//Inverter a imagem RGB
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			pos = y * bytesperline + x * channels;
-
-			data[pos] = (unsigned char)data[pos + 1];
-			data[pos + 2] = (unsigned char)data[pos + 1];
 		}
 	}
 	return 1;
@@ -546,173 +462,6 @@ int vc_rgb_to_gray(IVC* src, IVC* dst)
 	return 1;
 }
 
-//Converter RGB para HSV
-int vc_rgb_to_hsv(IVC* src, IVC* dst) {
-	int bytesperline_src = src->width * src->channels;
-	int channels_src = src->channels;
-	int width = src->width;
-	int height = src->height;
-	long int pos;
-	float rf, gf, bf;
-	float value;
-	float max;
-	float min;
-	float sat;
-	float hue;
-	if ((src->width <= 0) || (src->height <= 0) || (src->data == NULL)) return 0;
-	if ((src->width != dst->width) || (src->height != dst->height)) return 0;
-	if ((src->channels != 3) || (dst->channels != 3)) return 0;
-
-	for (int y = 0; y < height; ++y) {
-		for (int x = 0; x < width; ++x) {
-			pos = y * bytesperline_src + x * channels_src;
-
-			rf = (float)src->data[pos];
-			gf = (float)src->data[pos + 1];
-			bf = (float)src->data[pos + 2];
-
-			//maximo
-			if ((rf >= gf) && (rf >= bf))
-				max = rf;
-			else if ((gf >= rf) && (gf >= bf))
-				max = gf;
-			else max = bf;
-			value = max;
-
-			//minimo
-			if ((rf <= gf) && (rf <= bf))
-				min = rf;
-			else if ((gf <= rf) && (gf <= bf))
-				min = gf;
-			else min = bf;
-
-			if (max == 0) {
-				sat = 0;
-				hue = 0;
-			}
-			else {
-				sat = (max - min) / value;
-
-				if ((max == rf) && gf > bf)
-					hue = 60.0f * (gf - bf) / (max - min);
-				else if ((max == rf) && (bf >= gf))
-					hue = 360.0f + 60.0f * (gf - bf) / (max - min);
-				else if ((max == gf))
-					hue = 120.0f + 60.0f * (bf - rf) / (max - min);
-				else if ((max == bf))
-					hue = 240.0f + 60.0f * (rf - gf) / (max - min);
-				else if (max == min)
-					hue = 0;
-			}
-			dst->data[pos] = (unsigned char)((hue / 360.0f) * 255.0f);
-			dst->data[pos + 1] = (unsigned char)(sat * 255.0f);
-			dst->data[pos + 2] = (unsigned char)value;
-		}
-	}
-	return 1;
-}
-
-//Converter RGB para HSV
-int vc_hsv_segmentation(IVC* src, IVC* dst, int hmin, int hmax, int smin, int smax, int vmin, int vmax)
-{
-	unsigned char* datasrc = (unsigned char*)src->data;
-	unsigned char* datadst = (unsigned char*)dst->data;
-	int bytesperline_src = src->width * src->channels;
-	int bytesperline_dst = dst->width * dst->channels;
-	int channels_src = src->channels;
-	int channels_dst = dst->channels;
-	int width = src->width;
-	int height = src->height;
-	float h, s, v;
-	long int pos_src, pos_dst;
-	int x, y;
-
-	// Verifica��o de erros+
-	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
-	if (width != dst->width || height != dst->height) return 0;
-	if (channels_src != 3 || dst->channels != 1) return 0;
-
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			pos_src = y * bytesperline_src + x * channels_src;
-			pos_dst = y * bytesperline_dst + x * channels_dst;
-			h = ((float)datasrc[pos_src]) / 255.0f * 360.0f;
-			s = ((float)datasrc[pos_src + 1]) / 255.0f * 100.0f;
-			v = ((float)datasrc[pos_src + 2]) / 255.0f * 100.0f;
-
-
-			if (h >= hmin && h <= hmax
-				&& s >= smin && s <= smax
-				&& v >= vmin && v <= vmax) {
-				datadst[pos_dst] = (unsigned char)255;
-			}
-			else {
-				datadst[pos_dst] = (unsigned char)0;
-			}
-		}
-	}
-	return 1;
-}
-
-//Converter cinzentos(1canal) para RGB(3canais) (temperatura)
-int vc_scale_gray_to_rgb(IVC* src, IVC* dst)
-{
-	unsigned char* datasrc = (unsigned char*)src->data;
-	unsigned char* datadst = (unsigned char*)dst->data;
-	int bytesperline_src = src->width * src->channels;
-	int bytesperline_dst = dst->width * dst->channels;
-	int channels_src = src->channels;
-	int channels_dst = dst->channels;
-	int width = src->width;
-	int height = src->height;
-	int r, g, b;
-	long int pos_src, pos_dst;
-	int x, y;
-
-	// Verifica��o de erros
-	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
-	if (width != dst->width || height != dst->height) return 0;
-	if (channels_src != 1 || channels_dst != 3) return 0;
-
-	//Percorrer todos os pixeis da imagem fonte
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			pos_src = y * bytesperline_src + x * channels_src;
-			pos_dst = y * bytesperline_dst + x * channels_dst;
-
-			if (datasrc[pos_src] < 64) {
-				r = 0;
-				g = datasrc[pos_src] * 4;
-				b = 255;
-			}
-			else if (datasrc[pos_src] < 128) {
-				r = 0;
-				g = 255;
-				b = 255 - (datasrc[pos_src] - 64) * 4;
-			}
-			else if (datasrc[pos_src] < 192) {
-				r = (datasrc[pos_src] - 128) * 4;
-				g = 255;
-				b = 0;
-			}
-			else {
-				r = 255;
-				g = 255 - (datasrc[pos_src] - 192) * 4;
-				b = 0;
-			}
-
-			datadst[pos_dst] = (unsigned char)r;
-			datadst[pos_dst + 1] = (unsigned char)g;
-			datadst[pos_dst + 2] = (unsigned char)b;
-		}
-	}
-	return 1;
-}
-
 //Imagem bin�ria a partir do treshold
 int vc_gray_to_binary(IVC* src, IVC* dst, int treshold)
 {
@@ -744,110 +493,6 @@ int vc_gray_to_binary(IVC* src, IVC* dst, int treshold)
 			else {
 				datadst[pos] = 0;
 			}
-		}
-	}
-	return 1;
-}
-
-//Imagem bin�ria a partir da m�dia
-int vc_gray_to_binary_global_mean(IVC* src, IVC* dst)
-{
-	unsigned char* datasrc = (unsigned char*)src->data;
-	unsigned char* datadst = (unsigned char*)dst->data;
-	int bytesperline = src->width * src->channels;
-	int channels_src = src->channels;
-	int channels_dst = dst->channels;
-	int width = src->width;
-	int height = src->height;
-	long int pos;
-	int x, y, total = 0, pixel_count = 0;
-	float treshold;
-
-	// Verifica��o de erros
-	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
-	if (width != dst->width || height != dst->height) return 0;
-	if (channels_src != 1 || channels_dst != 1) return 0;
-
-	//Calculo media
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			pos = y * bytesperline + x * channels_src;
-
-			pixel_count++;
-			total += datasrc[pos];
-		}
-	}
-
-	treshold = total / pixel_count;
-	printf("total: %d | pixels: %d | Treshold: %f\n", total, pixel_count, treshold);
-
-	//Percorrer todos os pixeis da imagem fonte
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			pos = y * bytesperline + x * channels_src;
-
-			if (datasrc[pos] > treshold) {
-				datadst[pos] = 255;
-			}
-			else {
-				datadst[pos] = 0;
-			}
-		}
-	}
-	return 1;
-}
-
-//Imagem bin�ria automatica
-int vc_gray_to_binary_midpoint(IVC* src, IVC* dst, int kernel)
-{
-	unsigned char* datasrc = (unsigned char*)src->data;
-	unsigned char* datadst = (unsigned char*)dst->data;
-	int bytesperline = src->width * src->channels;
-	int channels_src = src->channels;
-	int channels_dst = dst->channels;
-	int width = src->width;
-	int height = src->height;
-	int offset = (kernel - 1) / 2;
-	long int pos;
-	int x, y, x2, y2, max, min;
-	float treshold;
-
-	// Verifica��o de erros
-	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
-	if (width != dst->width || height != dst->height) return 0;
-	if (channels_src != 1 || channels_dst != 1) return 0;
-
-	//Calculo media da vizinhanca de cada pixel
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			max = 0;
-			min = 255;
-			for (y2 = y - offset; y2 <= y + offset; y2++)
-			{
-				if (y2 > -1 && y2 < height)
-					for (x2 = x - offset; x2 <= x + offset; x2++)
-					{
-						//Verifica se o pixel existe
-						if (x2 > -1 && x2 < width) {
-							pos = y2 * bytesperline + x2 * channels_src;
-							if (datasrc[pos] > max) max = datasrc[pos];
-							if (datasrc[pos] < min) min = datasrc[pos];
-						}
-					}
-			}
-			pos = y * bytesperline + x * channels_src;
-			treshold = (unsigned char)((float)(max + min) / (float)2);
-
-			if (datasrc[pos] > treshold)
-				datadst[pos] = 255;
-			else
-				datadst[pos] = 0;
 		}
 	}
 	return 1;
@@ -953,35 +598,6 @@ int vc_binary_erode(IVC* src, IVC* dst, int kernel)
 				datadst[pos] = 255;
 		}
 	}
-	return 1;
-}
-
-//OPEN de imagem bin�ria
-int vc_binary_open(IVC* src, IVC* dst, int kernel, int kernel2)
-{
-	unsigned char* datasrc = (unsigned char*)src->data;
-	int channels_src = src->channels;
-	int channels_dst = dst->channels;
-	int width = src->width;
-	int height = src->height;
-
-	// Verifica��o de erros
-	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
-	if (width != dst->width || height != dst->height) return 0;
-	if (channels_src != 1 || channels_dst != 1) return 0;
-
-	IVC* aux = vc_image_new(width, height, channels_src, src->levels);
-	if (aux == NULL)
-	{
-		printf("ERROR -> vc_image_new():\n\tFail to create file!\n");
-		return 0;
-	}
-
-	vc_binary_erode(src, aux, kernel);
-	vc_binary_dilate(aux, dst, kernel2);
-
-	vc_image_free(aux);
-
 	return 1;
 }
 
@@ -1292,50 +908,6 @@ int vc_binary_blob_info(IVC* src, OVC* blobs, int nblobs)
 	return 1;
 }
 
-int vc_gray_histogram_show(IVC* src, IVC* dst) {
-	return 1;
-}
-
-int vc_gray_histogram_equalization(IVC* src, IVC* dst) {
-	unsigned char* data = (unsigned char*)src->data;
-	unsigned char* datadst = (unsigned char*)dst->data;
-	int width = src->width;
-	int height = src->height;
-	int bytesperline = src->bytesperline;
-	long int pos;
-	int i;
-	int npixels = width * height;
-	int hist[256] = { 0 };
-	float pdf[256] = { 0.0f };
-	float cdf[256], cdfmin;
-
-	//Verific��o de erros
-	if ((src->width <= 0) || (src->height <= 0) || (src->data == NULL)) return 0;
-	if ((src->width != dst->width) || (src->height != dst->height) || (src->channels != dst->channels)) return 0;
-	if (src->channels != 1) return 0;
-
-	for (pos = 0; pos < npixels; pos++)
-		hist[data[pos]]++;
-
-	for (i = 0; i < 256; i++)
-	{
-		pdf[i] = (float)hist[i] / (float)npixels;
-		if (i == 0) cdf[0] = pdf[0];
-		else cdf[i] = cdf[i - 1] + pdf[i];
-	}
-
-	for (i = 0, cdfmin = cdf[0]; i < 256; i++)
-		if (cdf[i] > 0.0) {
-			cdfmin = cdf[i];
-			break;
-		}
-
-	for (pos = 0; pos < npixels; pos++)
-		datadst[pos] = (unsigned char)((cdf[data[pos]] - cdfmin) / (1.0f - cdfmin) * 255.0f);
-
-	return 1;
-}
-
 int vc_binary_to_original(IVC* src, IVC* dst)
 {
 	unsigned char* data = (unsigned char*)src->data;
@@ -1346,49 +918,16 @@ int vc_binary_to_original(IVC* src, IVC* dst)
 	int channels = src->channels;
 	int x, y;
 	long int pos;
+	int npixels = width * height;
 
 	//Verifica��o de erros
 	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
 	if (channels != 1) return 0;
 
 	//Inverter a imagem Gray
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			pos = y * bytesperline + x * channels;
-			if (data[pos]==0) datadst[pos]=0;
-		}
-	}
-	return 1;
-}
+	for (pos = 0; pos < npixels; pos++)
+		if (data[pos]==0) datadst[pos]=0;
 
-int vc_rgb_to_original(IVC* src, IVC* dst)
-{
-	unsigned char* data = (unsigned char*)src->data;
-	unsigned char* datadst = (unsigned char*)dst->data;
-	int width = src->width;
-	int height = src->height;
-	int bytesperline = src->width * src->channels;
-	int channels = src->channels;
-	int x, y;
-	long int pos;
-
-	//Verifica��o de erros
-	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
-	if (channels != 3) return 0;
-
-	//Inverter a imagem Gray
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			pos = y * bytesperline + x * channels;
-			if (data[pos]==0) datadst[pos]=0;
-			if (data[pos+1]==0) datadst[pos+1]=0;
-			if (data[pos+2]==0) datadst[pos+2]=0;
-		}
-	}
 	return 1;
 }
 
@@ -1403,8 +942,9 @@ int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels)
 	int channels_dst = dst->channels;
 	int x, y, i;
 	long int pos, pos_dst;
+	int npixels = width * height;
 
-	//Verifica��o de erros
+	//Verificacao de erros
 	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
 	if (channels != 1 || channels_dst != 3) return 0;
 	//Inverter a imagem Gray
@@ -1494,41 +1034,5 @@ int vc_draw_center_mass(IVC* src, IVC* dst, OVC* blobs, int labels)
 		}
 	}
 
-	return 1;
-}
-
-//Converter cinzentos(1canal) para RGB(3canais) (temperatura)
-int vc_scale(IVC* src, IVC* dst)
-{
-	unsigned char* datasrc = (unsigned char*)src->data;
-	unsigned char* datadst = (unsigned char*)dst->data;
-	int bytesperline_src = src->width * src->channels;
-	int bytesperline_dst = dst->width * dst->channels;
-	int channels_src = src->channels;
-	int channels_dst = dst->channels;
-	int width = src->width;
-	int height = src->height;
-	int r, g, b;
-	long int pos_src, pos_dst;
-	int x, y;
-
-	// Verifica��o de erros
-	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
-	if (width != dst->width || height != dst->height) return 0;
-	if (channels_src != 1 || channels_dst != 3) return 0;
-
-	//Percorrer todos os pixeis da imagem fonte
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			pos_src = y * bytesperline_src + x * channels_src;
-			pos_dst = y * bytesperline_dst + x * channels_dst;
-
-			datadst[pos_dst] = datasrc[pos_src];
-			datadst[pos_dst + 1] = datasrc[pos_src];
-			datadst[pos_dst + 2] = datasrc[pos_src];
-		}
-	}
 	return 1;
 }
