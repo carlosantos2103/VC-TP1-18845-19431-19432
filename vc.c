@@ -103,7 +103,6 @@ char* netpbm_get_token(FILE* file, char* tok, int len)
 	return tok;
 }
 
-
 long int unsigned_char_to_bit(unsigned char* datauchar, unsigned char* databit, int width, int height)
 {
 	int x, y;
@@ -148,7 +147,6 @@ long int unsigned_char_to_bit(unsigned char* datauchar, unsigned char* databit, 
 	return counttotalbytes;
 }
 
-
 void bit_to_unsigned_char(unsigned char* databit, unsigned char* datauchar, int width, int height)
 {
 	int x, y;
@@ -186,7 +184,6 @@ void bit_to_unsigned_char(unsigned char* databit, unsigned char* datauchar, int 
 		}
 	}
 }
-
 
 IVC* vc_read_image(char* filename)
 {
@@ -307,7 +304,6 @@ IVC* vc_read_image(char* filename)
 	return image;
 }
 
-
 int vc_write_image(char* filename, IVC* image)
 {
 	FILE* file = NULL;
@@ -364,37 +360,6 @@ int vc_write_image(char* filename, IVC* image)
 	return 0;
 }
 
-
-//Gerar negativo de imagem RGB
-int vc_rgb_negative(IVC* srcdst)
-{
-	unsigned char* data = (unsigned char*)srcdst->data;
-	int width = srcdst->width;
-	int height = srcdst->height;
-	int bytesperline = srcdst->width * srcdst->channels;
-	int channels = srcdst->channels;
-	int x, y;
-	long int pos;
-
-	//Verifica��o de erros
-	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
-	if (channels != 3) return 0;
-
-	//Inverter a imagem RGB
-	for (y = 0; y < height; y++)
-	{
-		for (x = 0; x < width; x++)
-		{
-			pos = y * bytesperline + x * channels;
-
-			data[pos] = (unsigned char)(255 - data[pos]);
-			data[pos + 1] = (unsigned char)(255 - data[pos + 1]);
-			data[pos + 2] = (unsigned char)(255 - data[pos + 2]);
-		}
-	}
-	return 1;
-}
-
 //Extraçao do componente Blue da imagem RGB para Gray
 int vc_rgb_get_blue_gray(IVC* srcdst)
 {
@@ -424,7 +389,7 @@ int vc_rgb_get_blue_gray(IVC* srcdst)
 	return 1;
 }
 
-//Converter RGB para Gray
+//Converter RGB para Gray (1 canal)
 int vc_rgb_to_gray(IVC* src, IVC* dst)
 {
 	unsigned char* datasrc = (unsigned char*)src->data;
@@ -510,8 +475,7 @@ int vc_binary_dilate(IVC* src, IVC* dst, int kernel)
 	int height = src->height;
 	int offset = (kernel - 1) / 2;
 	long int pos;
-	int x, y, x2, y2, level;
-
+	int x, y, x2, y2, aux;
 
 	// Verificacao de erros
 	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
@@ -519,29 +483,35 @@ int vc_binary_dilate(IVC* src, IVC* dst, int kernel)
 	if (channels_src != 1 || channels_dst != 1) return 0;
 
 	//Calculo media da vizinhanca de cada pixel
+	//Percorre todos os pixeis da imagem
 	for (y = 0; y < height; y++)
 	{
 		for (x = 0; x < width; x++)
 		{
-			level = 0;
+			//Redefine o valor da variavel auxiliar a 0
+			aux = 0;
+			//Percorre o offset(vizinhanca) em y
 			for (y2 = y - offset; y2 <= y + offset; y2++)
 			{
-				//Verifica se o pixel existe
+				//Verifica se o pixel em y existe
 				if (y2 > -1 && y2 < height)
+					//Percorre o offset(vizinhanca) em x
 					for (x2 = x - offset; x2 <= x + offset; x2++)
 					{
+						//Verifica se o pixel em x existe
 						if (x2 > -1 && x2 < width) {
 							pos = y2 * bytesperline + x2 * channels_src;
+							//Verifica o plano do pixel vizinho
 							if (datasrc[pos] != 0) {
-								level = 1;
+								aux = 1;
 								break;
 							}
 						}
 					}
 			}
 			pos = y * bytesperline + x * channels_src;
-
-			if (level == 1)
+			//Caso o pixel em questao tenha um pixel vizinho do primeiro plano torna esse pixel do primeiro plano
+			if (aux == 1)
 				datadst[pos] = 255;
 			else
 				datadst[pos] = 0;
@@ -562,7 +532,7 @@ int vc_binary_erode(IVC* src, IVC* dst, int kernel)
 	int height = src->height;
 	int offset = (kernel - 1) / 2;
 	long int pos;
-	int x, y, x2, y2, level;
+	int x, y, x2, y2, aux;
 
 	// Verifica��o de erros
 	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
@@ -570,21 +540,27 @@ int vc_binary_erode(IVC* src, IVC* dst, int kernel)
 	if (channels_src != 1 || channels_dst != 1) return 0;
 
 	//Calculo media da vizinhanca de cada pixel
+	//Percorre todos os pixeis da imagem
 	for (y = 0; y < height; y++)
 	{
 		for (x = 0; x < width; x++)
 		{
-			level = 0;
+			//Redefine o valor da variavel auxiliar a 0
+			aux = 0;
+			//Percorre o offset(vizinhanca) em y
 			for (y2 = y - offset; y2 <= y + offset; y2++)
 			{
-				//Verifica se o pixel existe
+				//Verifica se o pixel em y existe
 				if (y2 > -1 && y2 < height)
+					//Percorre o offset(vizinhanca) em x
 					for (x2 = x - offset; x2 <= x + offset; x2++)
 					{
+						//Verifica se o pixel em x existe
 						if (x2 > -1 && x2 < width) {
 							pos = y2 * bytesperline + x2 * channels_src;
+							//Verifica o plano do pixel vizinho
 							if (datasrc[pos] == 0) {
-								level = 1;
+								aux = 1;
 								break;
 							}
 						}
@@ -592,7 +568,8 @@ int vc_binary_erode(IVC* src, IVC* dst, int kernel)
 			}
 			pos = y * bytesperline + x * channels_src;
 
-			if (level == 1)
+			//Caso o pixel em questao tenha um pixel vizinho do plano de fundo torna esse pixel do plano de fundo
+			if (aux == 1)
 				datadst[pos] = 0;
 			else
 				datadst[pos] = 255;
@@ -611,21 +588,26 @@ int vc_binary_close(IVC* src, IVC* dst, int kernel, int kernel2)
 	int height = src->height;
 	int ret = 1;
 
-	// Verifica��o de erros
+	// Verificacao de erros
 	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
 	if (width != dst->width || height != dst->height) return 0;
 	if (channels_src != 1 || channels_dst != 1) return 0;
 
+	// Cria uma imagem binaria
 	IVC* aux = vc_image_new(width, height, channels_src, src->levels);
+	// Verificacao de erros
 	if (aux == NULL)
 	{
 		printf("ERROR -> vc_image_new():\n\tFail to create file!\n");
 		return 0;
 	}
 
+	//Faz a dilatacao da imagem src para a imagem auxiliar com o primeiro kernel
 	ret &= vc_binary_dilate(src, aux, kernel);
+	//Faz a erosao da imagem auxilar para a imagem destino com o segundo kernel
 	ret &= vc_binary_erode(aux, dst, kernel2);
 
+	//Libertacao de memoria da imagem auxiliar
 	vc_image_free(aux);
 
 	return ret;
@@ -651,26 +633,26 @@ OVC* vc_binary_blob_labelling(IVC* src, IVC* dst, int* nlabels)
 	int labelarea[256] = { 0 };
 	int label = 1; // Etiqueta inicial.
 	int num, tmplabel;
-	OVC* blobs; // Apontador para array de blobs (objectos) que ser� retornado desta fun��o.
+	OVC* blobs; // Apontador para array de blobs (objectos) que sera retornado desta funcao.
 
-	// Verifica��o de erros
+	// Verificacao de erros
 	if ((src->width <= 0) || (src->height <= 0) || (src->data == NULL)) return 0;
 	if ((src->width != dst->width) || (src->height != dst->height) || (src->channels != dst->channels)) return NULL;
 	if (channels != 1) return NULL;
 
-	// Copia dados da imagem bin�ria para imagem grayscale
+	// Copia dados da imagem binaria para imagem grayscale
 	memcpy(datadst, datasrc, bytesperline * height);
 
-	// Todos os pix�is de plano de fundo devem obrigat�riamente ter valor 0
-	// Todos os pix�is de primeiro plano devem obrigat�riamente ter valor 255
-	// Ser�o atribu�das etiquetas no intervalo [1,254]
-	// Este algoritmo est� assim limitado a 255 labels
+	// Todos os pixeis de plano de fundo devem obrigatoriamente ter valor 0
+	// Todos os pixeis de primeiro plano devem obrigatoriamente ter valor 255
+	// Serao atribuidas etiquetas no intervalo [1,254]
+	// Este algoritmo esta assim limitado a 255 labels
 	for (i = 0, size = bytesperline * height; i < size; i++)
 	{
 		if (datadst[i] != 0) datadst[i] = 255;
 	}
 
-	// Limpa os rebordos da imagem bin�ria
+	// Limpa os rebordos da imagem binaria
 	for (y = 0; y < height; y++)
 	{
 		datadst[y * bytesperline + 0 * channels] = 0;
@@ -710,13 +692,13 @@ OVC* vc_binary_blob_labelling(IVC* src, IVC* dst, int* nlabels)
 				{
 					num = 255;
 
-					// Se A est� marcado
+					// Se A esta marcado
 					if (datadst[posA] != 0) num = labeltable[datadst[posA]];
-					// Se B est� marcado, e � menor que a etiqueta "num"
+					// Se B esta marcado, e e menor que a etiqueta "num"
 					if ((datadst[posB] != 0) && (labeltable[datadst[posB]] < num)) num = labeltable[datadst[posB]];
-					// Se C est� marcado, e � menor que a etiqueta "num"
+					// Se C esta marcado, e e menor que a etiqueta "num"
 					if ((datadst[posC] != 0) && (labeltable[datadst[posC]] < num)) num = labeltable[datadst[posC]];
-					// Se D est� marcado, e � menor que a etiqueta "num"
+					// Se D esta marcado, e e menor que a etiqueta "num"
 					if ((datadst[posD] != 0) && (labeltable[datadst[posD]] < num)) num = labeltable[datadst[posD]];
 
 					// Atribui a etiqueta ao pixel
@@ -830,7 +812,6 @@ OVC* vc_binary_blob_labelling(IVC* src, IVC* dst, int* nlabels)
 
 	return blobs;
 }
-
 
 int vc_binary_blob_info(IVC* src, OVC* blobs, int nblobs)
 {

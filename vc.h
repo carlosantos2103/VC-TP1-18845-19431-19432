@@ -46,17 +46,26 @@ IVC* vc_image_free(IVC* image);
 // FUNCOES: LEITURA E ESCRITA DE IMAGENS (PBM, PGM E PPM)
 IVC* vc_read_image(char* filename);
 int vc_write_image(char* filename, IVC* image);
-int vc_gray_negative(IVC* srcdst);
+
+// Extraçao do componente Blue da imagem RGB para Gray
 int vc_rgb_get_blue_gray(IVC* srcdst);
+// Converte uma imagem RGB para Gray (1 canal)
 int vc_rgb_to_gray(IVC* src, IVC* dst);
+//Imagem binaria a partir do treshold 
 int vc_gray_to_binary(IVC* src, IVC* dst, int treshold);
+//Dilatacao de imagem binaria
 int vc_binary_dilate(IVC* src, IVC* dst, int kernel);
+//Erosao de imagem binaria
 int vc_binary_erode(IVC* src, IVC* dst, int kernel);
+//Fechamento de imagem bin�ria
 int vc_binary_close(IVC* src, IVC* dst, int kernel, int kernel2);
 // Converte uma imagem binaria na imagem original igualmente binaria
 int vc_binary_to_original(IVC* src, IVC* dst);
+
 /*OVC*/
+// Etiquetagem de blobs
 OVC* vc_binary_blob_labelling(IVC* src, IVC* dst, int* nlabels);
+// TODO: legendar
 int vc_binary_blob_info(IVC* src, OVC* blobs, int nblobs);
 // Desenha uma caixa delimitadora em cada um dos objetos
 int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels);
