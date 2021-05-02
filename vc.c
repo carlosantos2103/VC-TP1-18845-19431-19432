@@ -47,7 +47,7 @@ IVC* vc_image_new(int width, int height, int channels, int levels)
 }
 
 
-// Libertar mem�ria de uma imagem
+// Libertar memoria de uma imagem
 IVC* vc_image_free(IVC* image)
 {
 	if (image != NULL)
@@ -67,7 +67,7 @@ IVC* vc_image_free(IVC* image)
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//    FUN��ES: LEITURA E ESCRITA DE IMAGENS (PBM, PGM E PPM)
+//    FUNÇOES: LEITURA E ESCRITA DE IMAGENS (PBM, PGM E PPM)
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -395,7 +395,7 @@ int vc_rgb_negative(IVC* srcdst)
 	return 1;
 }
 
-//Extra��o do componente Blue da imagem RGB para Gray
+//Extraçao do componente Blue da imagem RGB para Gray
 int vc_rgb_get_blue_gray(IVC* srcdst)
 {
 	unsigned char* data = (unsigned char*)srcdst->data;
@@ -462,7 +462,7 @@ int vc_rgb_to_gray(IVC* src, IVC* dst)
 	return 1;
 }
 
-//Imagem bin�ria a partir do treshold
+//Imagem binaria a partir do treshold 
 int vc_gray_to_binary(IVC* src, IVC* dst, int treshold)
 {
 	unsigned char* datasrc = (unsigned char*)src->data;
@@ -632,10 +632,10 @@ int vc_binary_close(IVC* src, IVC* dst, int kernel, int kernel2)
 }
 
 // Etiquetagem de blobs
-// src		: Imagem bin�ria de entrada
-// dst		: Imagem grayscale (ir� conter as etiquetas)
-// nlabels	: Endere�o de mem�ria de uma vari�vel, onde ser� armazenado o n�mero de etiquetas encontradas.
-// OVC*		: Retorna um array de estruturas de blobs (objectos), com respectivas etiquetas. � necess�rio libertar posteriormente esta mem�ria.
+// src		: Imagem binaria de entrada
+// dst		: Imagem grayscale (ira conter as etiquetas)
+// nlabels	: Endereço de memoria de uma variavel, onde sera armazenado o numero de etiquetas encontradas.
+// OVC*		: Retorna um array de estruturas de blobs (objectos), com respectivas etiquetas. E necessario libertar posteriormente esta memoria.
 OVC* vc_binary_blob_labelling(IVC* src, IVC* dst, int* nlabels)
 {
 	unsigned char* datasrc = (unsigned char*)src->data;
@@ -908,6 +908,7 @@ int vc_binary_blob_info(IVC* src, OVC* blobs, int nblobs)
 	return 1;
 }
 
+// Converte uma imagem binaria na imagem original igualmente binaria
 int vc_binary_to_original(IVC* src, IVC* dst)
 {
 	unsigned char* data = (unsigned char*)src->data;
@@ -931,6 +932,7 @@ int vc_binary_to_original(IVC* src, IVC* dst)
 	return 1;
 }
 
+// Desenha uma caixa delimitadora em cada um dos objetos
 int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels)
 {
 	unsigned char* data = (unsigned char*)src->data;
@@ -977,6 +979,7 @@ int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels)
 	return 1;
 }
 
+// Desenha o centro de massa do objeto
 int vc_draw_center_mass(IVC* src, IVC* dst, OVC* blobs, int labels)
 {
 	unsigned char* data = (unsigned char*)src->data;

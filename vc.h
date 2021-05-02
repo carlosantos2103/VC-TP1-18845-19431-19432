@@ -53,11 +53,12 @@ int vc_gray_to_binary(IVC* src, IVC* dst, int treshold);
 int vc_binary_dilate(IVC* src, IVC* dst, int kernel);
 int vc_binary_erode(IVC* src, IVC* dst, int kernel);
 int vc_binary_close(IVC* src, IVC* dst, int kernel, int kernel2);
-
+// Converte uma imagem binaria na imagem original igualmente binaria
 int vc_binary_to_original(IVC* src, IVC* dst);
 /*OVC*/
 OVC* vc_binary_blob_labelling(IVC* src, IVC* dst, int* nlabels);
 int vc_binary_blob_info(IVC* src, OVC* blobs, int nblobs);
+// Desenha uma caixa delimitadora em cada um dos objetos
 int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels);
-
+// Desenha o centro de massa do objeto
 int vc_draw_center_mass(IVC* src, IVC* dst, OVC* blobs, int labels);
