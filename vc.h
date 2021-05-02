@@ -65,7 +65,7 @@ int vc_binary_to_original(IVC* src, IVC* dst);
 /*OVC*/
 // Etiquetagem de blobs
 OVC* vc_binary_blob_labelling(IVC* src, IVC* dst, int* nlabels);
-// TODO: legendar
+// Calcular a Area, Perimetro de cada objeto
 int vc_binary_blob_info(IVC* src, OVC* blobs, int nblobs);
 // Desenha uma caixa delimitadora em cada um dos objetos
 int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels);

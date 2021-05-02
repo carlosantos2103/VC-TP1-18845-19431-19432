@@ -404,7 +404,7 @@ int vc_rgb_to_gray(IVC* src, IVC* dst)
 	long int pos_src, pos_dst;
 	float rf, gf, bf;
 
-	//Verifica��o de erros
+	//Verificacao de erros
 	if ((src->width <= 0) || (src->height <= 0) || (src->data == NULL)) return 0;
 	if ((src->width != dst->width) || (src->height != dst->height)) return 0;
 	if ((src->channels != 3) || (dst->channels != 1)) return 0;
@@ -534,7 +534,7 @@ int vc_binary_erode(IVC* src, IVC* dst, int kernel)
 	long int pos;
 	int x, y, x2, y2, aux;
 
-	// Verifica��o de erros
+	// Verificaçao de erros
 	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
 	if (width != dst->width || height != dst->height) return 0;
 	if (channels_src != 1 || channels_dst != 1) return 0;
@@ -578,7 +578,7 @@ int vc_binary_erode(IVC* src, IVC* dst, int kernel)
 	return 1;
 }
 
-//close de imagem bin�ria
+//close de imagem binaria
 int vc_binary_close(IVC* src, IVC* dst, int kernel, int kernel2)
 {
 	unsigned char* datasrc = (unsigned char*)src->data;
@@ -779,7 +779,7 @@ OVC* vc_binary_blob_labelling(IVC* src, IVC* dst, int* nlabels)
 
 	//printf("\nMax Label = %d\n", label);
 
-	// Contagem do n�mero de blobs
+	// Contagem do numero de blobs
 	// Passo 1: Eliminar, da tabela, etiquetas repetidas
 	for (a = 1; a < label - 1; a++)
 	{
@@ -788,7 +788,7 @@ OVC* vc_binary_blob_labelling(IVC* src, IVC* dst, int* nlabels)
 			if (labeltable[a] == labeltable[b]) labeltable[b] = 0;
 		}
 	}
-	// Passo 2: Conta etiquetas e organiza a tabela de etiquetas, para que n�o hajam valores vazios (zero) entre etiquetas
+	// Passo 2: Conta etiquetas e organiza a tabela de etiquetas, para que nao hajam valores vazios (zero) entre etiquetas
 	*nlabels = 0;
 	for (a = 1; a < label; a++)
 	{
@@ -799,7 +799,7 @@ OVC* vc_binary_blob_labelling(IVC* src, IVC* dst, int* nlabels)
 		}
 	}
 
-	// Se n�o h� blobs
+	// Se nao ha blobs
 	if (*nlabels == 0) return NULL;
 
 	// Cria lista de blobs (objectos) e preenche a etiqueta
@@ -813,6 +813,7 @@ OVC* vc_binary_blob_labelling(IVC* src, IVC* dst, int* nlabels)
 	return blobs;
 }
 
+// Calcular a Area, Perimetro de cada objeto
 int vc_binary_blob_info(IVC* src, OVC* blobs, int nblobs)
 {
 	unsigned char* data = (unsigned char*)src->data;
@@ -825,11 +826,11 @@ int vc_binary_blob_info(IVC* src, OVC* blobs, int nblobs)
 	int xmin, ymin, xmax, ymax;
 	long int sumx, sumy;
 
-	// Verifica��o de erros
+	// Verificaçao de erros
 	if ((src->width <= 0) || (src->height <= 0) || (src->data == NULL)) return 0;
 	if (channels != 1) return 0;
 
-	// Conta �rea de cada blob
+	// Conta area de cada blob
 	for (i = 0; i < nblobs; i++)
 	{
 		xmin = width - 1;
@@ -850,7 +851,7 @@ int vc_binary_blob_info(IVC* src, OVC* blobs, int nblobs)
 
 				if (data[pos] == blobs[i].label)
 				{
-					// �rea
+					// Area
 					blobs[i].area++;
 
 					// Centro de Gravidade
@@ -863,8 +864,8 @@ int vc_binary_blob_info(IVC* src, OVC* blobs, int nblobs)
 					if (xmax < x) xmax = x;
 					if (ymax < y) ymax = y;
 
-					// Per�metro
-					// Se pelo menos um dos quatro vizinhos n�o pertence ao mesmo label, ent�o � um pixel de contorno
+					// Perimetro
+					// Se pelo menos um dos quatro vizinhos nao pertence ao mesmo label, entao e um pixel de contorno
 					if ((data[pos - 1] != blobs[i].label) || (data[pos + 1] != blobs[i].label) || (data[pos - bytesperline] != blobs[i].label) || (data[pos + bytesperline] != blobs[i].label))
 					{
 						blobs[i].perimeter++;
@@ -902,12 +903,13 @@ int vc_binary_to_original(IVC* src, IVC* dst)
 	long int pos;
 	int npixels = width * height;
 
-	//Verifica��o de erros
+	//Verificaçao de erros
 	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
 	if (channels != 1) return 0;
 
-	//Inverter a imagem Gray
+	// Percorre todos os pixeis da imagem
 	for (pos = 0; pos < npixels; pos++)
+		// Caso o pixel dessa imagem seja preto a imagem de destino tb fica com o pixel preto, senao nao muda a cor do pixel de destino
 		if (data[pos]==0) datadst[pos]=0;
 
 	return 1;
@@ -930,17 +932,22 @@ int vc_draw_bouding_box(IVC* src, IVC* dst, OVC* blobs, int labels)
 	//Verificacao de erros
 	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
 	if (channels != 1 || channels_dst != 3) return 0;
-	//Inverter a imagem Gray
+	//Verifica se existe blobs
 	if (blobs != NULL)
 	{
+		// Percorre todos os objetos existentes
 		for (i = 0; i < labels; i++)
 		{
+			// Percorre todos os pixeis da imagem
 			for (y = 0; y < height; y++)
 			{
 				for (x = 0; x < width; x++)
 				{
+					// Calculo da posicao da imagem cinzenta, com 1 channel
 					pos = y * bytesperline + x * channels;
+					// Calculo da posicao da imagem RGB, com 3 channel
 					pos_dst = y * dst->bytesperline + x * dst->channels;
+					// Caso o y e x estejam compreendidos entre os parametros dos blobs desenha-se a caixa delimitadora
 					if (y >= blobs[i].y && y <= blobs[i].y+blobs[i].height && x >= blobs[i].x && x <= blobs[i].x+blobs[i].width)
 						if (x == blobs[i].x || x == blobs[i].x+blobs[i].width){
 							datadst[pos_dst] = 255;
@@ -973,38 +980,50 @@ int vc_draw_center_mass(IVC* src, IVC* dst, OVC* blobs, int labels)
 	int x, y, i, j;
 	long int pos, pos_dst;
 
-	//Verifica��o de erros
+	//Verificacao de erros
 	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
 	if (channels != 1 || channels_dst != 3) return 0;
-	//Inverter a imagem Gray
+	//Verifica se existe blobs
 	if (blobs != NULL)
 	{
+		// Percorre todos os objetos existentes
 		for (i = 0; i < labels; i++)
 		{
+			// Percorre todos os pixeis da imagem
 			for (y = 0; y < height; y++)
 			{
+				// Caso o y corresponda ao valor do blobg calculado em y
 				if (y==blobs[i].yc){
 					for (x = 0; x < width; x++)
 					{
+						// Caso o x corresponda ao valor do blobg calculado em x
 						if(x==blobs[i].xc) {
+							// Calculo da posicao
 							pos_dst = y * dst->bytesperline + x * dst->channels;
 
+							// Alteracao dos pixeis para a cor branca de forma a salientar o centro de massa
+
+							// Pixel central
 							datadst[pos_dst] = 255;
 							datadst[pos_dst+1] = 255;
 							datadst[pos_dst+2] = 255;
 
+							// Pixel seguinte
 							datadst[pos_dst+3] = 255;
 							datadst[pos_dst+4] = 255;
 							datadst[pos_dst+5] = 255;
 
+							// Pixel Anterior
 							datadst[pos_dst-1] = 255;
 							datadst[pos_dst-2] = 255;
 							datadst[pos_dst-3] = 255;
 							
+							// Pixel superior em relacao ao pixel central
 							datadst[pos_dst-width*3] = 255;
 							datadst[pos_dst-width*3+1] = 255;
 							datadst[pos_dst-width*3+2] = 255;
 
+							// Pixel inferior em relacao ao pixel central
 							datadst[pos_dst+width*3] = 255;
 							datadst[pos_dst+width*3+1] = 255;
 							datadst[pos_dst+width*3+2] = 255;
