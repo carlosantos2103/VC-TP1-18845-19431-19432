@@ -36,10 +36,8 @@ IVC* vc_image_new(int width, int height, int channels, int levels)
 	image->channels = channels;
 	image->levels = levels;
 	image->bytesperline = image->width * image->channels;
-	//Alocar menória para uma imagem;
 	image->data = (unsigned char*)malloc(image->width * image->height * image->channels * sizeof(char));
 
-	//Se a imagem a imagem não existir liberta a sua memória
 	if (image->data == NULL)
 	{
 		return vc_image_free(image);
@@ -372,21 +370,19 @@ int vc_rgb_get_blue_gray(IVC* srcdst)
 	int channels = srcdst->channels;
 	int x, y;
 	long int pos;
+	int npixels = width * channels * height;
 
-	//Verifica��o de erros
+	//Verificacao de erros
 	if ((width <= 0) || (height <= 0) || (data == NULL)) return 0;
 	if (channels != 3) return 0;
 
-	//Inverter a imagem RGB
-	for (y = 0; y < height; y++)
+	// Inverter a imagem RGB para cinzenta
+	// Percorrer todos os pixeis da imagem
+	for (pos = 0; pos < npixels; pos+=3)
 	{
-		for (x = 0; x < width; x++)
-		{
-			pos = y * bytesperline + x * channels;
-
-			data[pos] = (unsigned char)data[pos + 2];
-			data[pos + 1] = (unsigned char)data[pos + 2];
-		}
+		// Transforma os pixeis R e G em B tornando assim a imagem cinzenta a escala do azul
+		data[pos] = (unsigned char)data[pos + 2];
+		data[pos + 1] = (unsigned char)data[pos + 2];
 	}
 	return 1;
 }
@@ -411,18 +407,22 @@ int vc_rgb_to_gray(IVC* src, IVC* dst)
 	if ((src->width != dst->width) || (src->height != dst->height)) return 0;
 	if ((src->channels != 3) || (dst->channels != 1)) return 0;
 
-	//Inverter a imagem RGB
+	//Inverter a imagem RGB para cinzenta
+	// Percorrer todos os pixeis da imagem
 	for (y = 0; y < height; y++)
 	{
 		for (x = 0; x < width; x++)
 		{
+			// Calculo das posicoes
 			pos_src = y * bytesperline_src + x * channels_src;
 			pos_dst = y * bytesperline_dst + x * channels_dst;
 
+			// Obtem os valores de R, G e B
 			rf = (float)datasrc[pos_src];
 			gf = (float)datasrc[pos_src + 1];
 			bf = (float)datasrc[pos_src + 2];
 
+			// Calculo do valor cinzento
 			datadst[pos_dst] = (unsigned char)((rf * 0.299) + (gf * 0.587) + (bf * 0.114));
 		}
 	}
@@ -441,25 +441,22 @@ int vc_gray_to_binary(IVC* src, IVC* dst, int treshold)
 	int height = src->height;
 	long int pos;
 	int x, y;
+	int npixels = width * channels_src * height;
 
-	// Verifica��o de erros
+	// Verificacao de erros
 	if ((width <= 0) || (height <= 0) || (datasrc == NULL)) return 0;
 	if (width != dst->width || height != dst->height) return 0;
 	if (channels_src != 1 || channels_dst != 1) return 0;
 
 	//Percorrer todos os pixeis da imagem fonte
-	for (y = 0; y < height; y++)
+	for (pos = 0; pos < npixels; pos++)
 	{
-		for (x = 0; x < width; x++)
-		{
-			pos = y * bytesperline + x * channels_src;
-
-			if (datasrc[pos] > treshold) {
-				datadst[pos] = 255;
-			}
-			else {
-				datadst[pos] = 0;
-			}
+		// Caso o valor daquele pixel seja maior que o treshold, torna esse pixel de primeiro plano
+		if (datasrc[pos] > treshold) {
+			datadst[pos] = 255;
+		}
+		else {
+			datadst[pos] = 0;
 		}
 	}
 	return 1;
