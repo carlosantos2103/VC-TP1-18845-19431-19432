@@ -51,7 +51,7 @@ int main(){
 	}
 
 	// Binarizacao por thresholding de modo a salientar
-	aux = vc_gray_to_binary(image[0],image[1],70);
+	aux = vc_gray_to_binary(image[0],image[1],73);
 	// Verificacao de erros
 	if (aux == 0)
 	{
@@ -144,7 +144,7 @@ int main(){
 	{
 		printf("-> Area %d\n", blobs[i].area);
 		printf("-> Perimetro %d\n", blobs[i].perimeter);
-		printf("-> Centro de Massa (%d,%d)\n", blobs[i].xc, blobs[i].yc);  //A REVER //funcao vc_binary_blob_info tinha a parte do centro de gravidade comentada
+		printf("-> Centro de Massa (%d,%d)\n", blobs[i].xc, blobs[i].yc);
 	}
 	// Libertar memória
 	free(blobs);
