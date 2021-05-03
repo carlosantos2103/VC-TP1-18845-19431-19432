@@ -36,8 +36,10 @@ IVC* vc_image_new(int width, int height, int channels, int levels)
 	image->channels = channels;
 	image->levels = levels;
 	image->bytesperline = image->width * image->channels;
+	//Alocar menória para uma imagem;
 	image->data = (unsigned char*)malloc(image->width * image->height * image->channels * sizeof(char));
 
+	//Se a imagem a imagem não existir liberta a sua memória
 	if (image->data == NULL)
 	{
 		return vc_image_free(image);
